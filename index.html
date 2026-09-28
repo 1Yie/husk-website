@@ -1,10 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
 	<head>
 		<meta charset="UTF-8" />
-		<link rel="icon" type="image/svg+xml" href="/vite.svg" />
+		<link rel="icon" type="image/png" href="/husk-icon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Ichiyo Template</title>
+		<meta
+			name="description"
+			content="Husk — 运行于本地的 AI 编程智能体。Rust 内核，原生桌面体验。"
+		/>
+		<title>Husk — 运行于本地的 AI 编程智能体</title>
+		<script>
+			(function () {
+				var t = localStorage.getItem('husk-theme');
+				var dark =
+					t === 'dark' ||
+					((!t || t === 'system') &&
+						matchMedia('(prefers-color-scheme: dark)').matches);
+				document.documentElement.classList.toggle('dark', dark);
+			})();
+		</script>
 	</head>
 	<body>
 		<div id="root"></div>

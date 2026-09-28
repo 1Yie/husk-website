@@ -12,6 +12,8 @@ export default defineConfig([
 		'dist',
 		'src/components/ui/**',
 		'src/components/coss/**',
+		// vendored react-bits backgrounds (generated, not linted)
+		'src/components/gradient-waves.tsx',
 		'src/test/**',
 	]),
 

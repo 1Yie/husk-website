@@ -1,162 +1,525 @@
 @import 'tailwindcss';
-@import 'tw-animate-css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Site chrome palette — flips in .dark. The husk app replica keeps its own
+   literal light colors (it's a product window, not page chrome). */
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-	--animate-skeleton: skeleton 2s -1s infinite linear;
-	--color-warning-foreground: var(--warning-foreground);
-	--color-warning: var(--warning);
-	--color-success-foreground: var(--success-foreground);
-	--color-success: var(--success);
-	--color-info-foreground: var(--info-foreground);
-	--color-info: var(--info);
-	--color-destructive-foreground: var(--destructive-foreground);
-	--color-sidebar-ring: var(--sidebar-ring);
-	--color-sidebar-border: var(--sidebar-border);
-	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-	--color-sidebar-accent: var(--sidebar-accent);
-	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-	--color-sidebar-primary: var(--sidebar-primary);
-	--color-sidebar-foreground: var(--sidebar-foreground);
-	--color-sidebar: var(--sidebar);
-	--color-chart-5: var(--chart-5);
-	--color-chart-4: var(--chart-4);
-	--color-chart-3: var(--chart-3);
-	--color-chart-2: var(--chart-2);
-	--color-chart-1: var(--chart-1);
-	--color-ring: var(--ring);
-	--color-input: var(--input);
-	--color-border: var(--border);
-	--color-destructive: var(--destructive);
-	--color-accent-foreground: var(--accent-foreground);
-	--color-accent: var(--accent);
-	--color-muted-foreground: var(--muted-foreground);
-	--color-muted: var(--muted);
-	--color-secondary-foreground: var(--secondary-foreground);
-	--color-secondary: var(--secondary);
-	--color-primary-foreground: var(--primary-foreground);
-	--color-primary: var(--primary);
-	--color-popover-foreground: var(--popover-foreground);
-	--color-popover: var(--popover);
-	--color-card-foreground: var(--card-foreground);
-	--color-card: var(--card);
-	--color-foreground: var(--foreground);
-	--color-background: var(--background);
-	--radius-sm: calc(var(--radius) - 4px);
-	--radius-md: calc(var(--radius) - 2px);
-	--radius-lg: var(--radius);
-	--radius-xl: calc(var(--radius) + 4px);
-	--radius-2xl: calc(var(--radius) + 8px);
-	--radius-3xl: calc(var(--radius) + 12px);
-	--radius-4xl: calc(var(--radius) + 16px);
-	@keyframes skeleton {
-		to {
-			background-position: -200% 0;
-		}
-	}
+/* ---------------------------------------------------------------------------
+   Husk app theme — tokens ported 1:1 from agent-rs/crates/app-tauri/frontend.
+   Light theme is the canonical look for the site; the .dark set is kept so a
+   theme toggle can flip the replica without touching components.
+   ------------------------------------------------------------------------- */
+@font-face {
+	font-family: 'MiSans';
+	src: url('./assets/font/MiSansVF.ttf') format('truetype');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'JetBrains Mono';
+	src: url('./assets/font/JetBrainsMonoNerdFontMono-Regular.ttf')
+		format('truetype');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
 }
 
 :root {
-	--radius: 0.625rem;
-	--background: var(--color-white);
-	--foreground: var(--color-zinc-800);
-	--card: var(--color-white);
-	--card-foreground: var(--color-zinc-800);
-	--popover: var(--color-white);
-	--popover-foreground: var(--color-zinc-800);
-	--primary: var(--color-zinc-800);
-	--primary-foreground: var(--color-zinc-50);
-	--secondary: --alpha(var(--color-black) / 4%);
-	--secondary-foreground: var(--color-zinc-800);
-	--muted: --alpha(var(--color-black) / 4%);
-	--muted-foreground: color-mix(
-		in srgb,
-		var(--color-zinc-500) 90%,
-		var(--color-black)
-	);
-	--accent: --alpha(var(--color-black) / 4%);
-	--accent-foreground: var(--color-zinc-800);
-	--destructive: var(--color-red-500);
-	--border: --alpha(var(--color-black) / 12%);
-	--input: --alpha(var(--color-black) / 12%);
-	--ring: var(--color-zinc-400);
-	--chart-1: oklch(0.646 0.222 41.116);
-	--chart-2: oklch(0.6 0.118 184.704);
-	--chart-3: oklch(0.398 0.07 227.392);
-	--chart-4: oklch(0.828 0.189 84.429);
-	--chart-5: oklch(0.769 0.188 70.08);
-	--sidebar: oklch(0.985 0 0);
-	--sidebar-foreground: oklch(0.141 0.005 285.823);
-	--sidebar-primary: oklch(0.21 0.006 285.885);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.967 0.001 286.375);
-	--sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-	--sidebar-border: oklch(0.92 0.004 286.32);
-	--sidebar-ring: oklch(0.705 0.015 286.067);
-	--destructive-foreground: var(--color-red-700);
-	--info: var(--color-blue-500);
-	--info-foreground: var(--color-blue-700);
-	--success: var(--color-emerald-500);
-	--success-foreground: var(--color-emerald-700);
-	--warning: var(--color-amber-500);
-	--warning-foreground: var(--color-amber-700);
+	--husk-bg: #ffffff;
+	--husk-fg: #1a1c1f;
+	--husk-accent: #339cff;
+	--husk-panel: #f3f3f5;
+	--husk-card: #ffffff;
+	--husk-hover: #e8e8ed;
+	--husk-active: #ffffff;
+	--husk-border: #e4e4e7;
+	--husk-focus: #a1a1aa;
+	--husk-fg-secondary: #52525b;
+	--husk-fg-muted: #71717a;
+	--husk-fg-dim: #a1a1aa;
+	--husk-bubble-user: #e3e3e8;
+	--husk-activity: #10b981;
+	--husk-ui-font:
+		'MiSans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+	--husk-code-font:
+		'JetBrains Mono', 'JetBrainsMono Nerd Font Mono', ui-monospace, monospace;
+	--husk-n50: #fafafa;
+	--husk-n100: #f4f4f5;
+	--husk-n200: #e4e4e7;
+	--husk-n300: #d4d4d8;
+	--husk-n400: #a1a1aa;
+	--husk-n500: #71717a;
+	--husk-n600: #52525b;
+	--husk-n700: #3f3f46;
+	--husk-n800: #27272a;
+	--husk-n900: #18181b;
+	--husk-n950: #09090b;
+	--husk-white: #ffffff;
+	--husk-black: #09090b;
 }
 
 .dark {
-	--background: color-mix(
-		in srgb,
-		var(--color-zinc-950) 98%,
-		var(--color-white)
-	);
-	--foreground: var(--color-zinc-200);
-	--card: color-mix(in srgb, var(--background) 98%, var(--color-white));
-	--card-foreground: var(--color-zinc-200);
-	--popover: color-mix(in srgb, var(--background) 96%, var(--color-white));
-	--popover-foreground: var(--color-zinc-200);
-	--primary: var(--color-zinc-200);
-	--primary-foreground: var(--color-zinc-800);
-	--secondary: --alpha(var(--color-white) / 6%);
-	--secondary-foreground: var(--color-zinc-200);
-	--muted: --alpha(var(--color-white) / 6%);
-	--muted-foreground: color-mix(
-		in srgb,
-		var(--color-zinc-500) 90%,
-		var(--color-white)
-	);
-	--accent: --alpha(var(--color-white) / 6%);
-	--accent-foreground: var(--color-zinc-200);
-	--destructive: var(--color-red-500);
-	--border: --alpha(var(--color-white) / 12%);
-	--input: --alpha(var(--color-white) / 12%);
-	--ring: var(--color-zinc-500);
-	--chart-1: oklch(0.488 0.243 264.376);
-	--chart-2: oklch(0.696 0.17 162.48);
-	--chart-3: oklch(0.769 0.188 70.08);
-	--chart-4: oklch(0.627 0.265 303.9);
-	--chart-5: oklch(0.645 0.246 16.439);
-	--sidebar: oklch(0.21 0.006 285.885);
-	--sidebar-foreground: oklch(0.985 0 0);
-	--sidebar-primary: oklch(0.488 0.243 264.376);
-	--sidebar-primary-foreground: oklch(0.985 0 0);
-	--sidebar-accent: oklch(0.274 0.006 286.033);
-	--sidebar-accent-foreground: oklch(0.985 0 0);
-	--sidebar-border: oklch(1 0 0 / 10%);
-	--sidebar-ring: oklch(0.552 0.016 285.938);
-	--destructive-foreground: var(--color-red-400);
-	--info: var(--color-blue-500);
-	--info-foreground: var(--color-blue-400);
-	--success: var(--color-emerald-500);
-	--success-foreground: var(--color-emerald-400);
-	--warning: var(--color-amber-500);
-	--warning-foreground: var(--color-amber-400);
+	--husk-bg: #16161a;
+	--husk-fg: #e4e4e7;
+	--husk-accent: #4da3ff;
+	--husk-panel: #1b1b21;
+	--husk-card: #26262d;
+	--husk-hover: #2b2b32;
+	--husk-active: #26262d;
+	--husk-border: #34343d;
+	--husk-focus: #5b5b66;
+	--husk-fg-secondary: #a1a1aa;
+	--husk-fg-muted: #7a7a84;
+	--husk-fg-dim: #5b5b66;
+	--husk-bubble-user: #2c2c34;
+	--husk-activity: #34d399;
+	--husk-n50: #141419;
+	--husk-n100: #1e1e24;
+	--husk-n200: #2d2d35;
+	--husk-n300: #3f3f49;
+	--husk-n400: #55555f;
+	--husk-n500: #71717a;
+	--husk-n600: #a1a1aa;
+	--husk-n700: #d4d4d8;
+	--husk-n800: #e4e4e7;
+	--husk-n900: #f4f4f5;
+	--husk-n950: #fafafa;
+	--husk-white: #232329;
+	--husk-black: #fafafa;
 }
 
-@layer base {
-	* {
-		@apply border-border outline-ring/50;
-	}
-	body {
-		@apply bg-background text-foreground;
-	}
+/* Tailwind v4 theme — map utility names onto the husk vars so the ported
+   markup (bg-panel, border-hairline, text-neutral-600, rounded-2xl=22px…)
+   renders identically to the desktop build. */
+@theme {
+	--color-page: #f5f5f6;
+	--color-card: #ffffff;
+	--color-ink: #171717;
+	--color-dim: #565656;
+	--color-faint: #8f8f97;
+	--color-line: #e4e4e8;
+	--color-workspace: var(--husk-bg);
+	--color-panel: var(--husk-panel);
+	--color-card: var(--husk-card);
+	--color-hover: var(--husk-hover);
+	--color-active: var(--husk-active);
+	--color-hairline: var(--husk-border);
+	--color-focus: var(--husk-focus);
+	--color-text-primary: var(--husk-fg);
+	--color-text-secondary: var(--husk-fg-secondary);
+	--color-text-muted: var(--husk-fg-muted);
+	--color-text-dim: var(--husk-fg-dim);
+	--color-bubble-user: var(--husk-bubble-user);
+	--color-accent: var(--husk-accent);
+	--color-white: var(--husk-white);
+	--color-black: var(--husk-black);
+	--color-neutral-50: var(--husk-n50);
+	--color-neutral-100: var(--husk-n100);
+	--color-neutral-200: var(--husk-n200);
+	--color-neutral-300: var(--husk-n300);
+	--color-neutral-400: var(--husk-n400);
+	--color-neutral-500: var(--husk-n500);
+	--color-neutral-600: var(--husk-n600);
+	--color-neutral-700: var(--husk-n700);
+	--color-neutral-800: var(--husk-n800);
+	--color-neutral-900: var(--husk-n900);
+	--color-neutral-950: var(--husk-n950);
+	--color-diff-add: #16a34a;
+	--color-diff-add-surface: #f0fdf4;
+	--color-diff-del: #dc2626;
+	--color-diff-del-surface: #fef2f2;
+	--color-running: #9333ea;
+	--color-warn: #d97706;
+	--color-error: #dc2626;
+
+	--font-sans: var(--husk-ui-font);
+	--font-mono: var(--husk-code-font);
+
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 14px;
+	--radius-xl: 18px;
+	--radius-2xl: 22px;
+
+	--shadow-sidebar-active: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	--shadow-composer: 0 4px 20px 0 rgba(0, 0, 0, 0.06);
+	--shadow-popup:
+		0 8px 24px -6px rgba(0, 0, 0, 0.16), 0 2px 6px -2px rgba(0, 0, 0, 0.06);
+}
+
+html,
+body,
+#root {
+	height: 100%;
+	margin: 0;
+	background-color: var(--husk-bg);
+	color: var(--husk-fg);
+	font-family: var(--husk-ui-font);
+}
+
+body {
+	font-size: 14px;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+	width: 6px;
+	height: 6px;
+}
+::-webkit-scrollbar-corner {
+	background: transparent;
+}
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+::-webkit-scrollbar-thumb {
+	background: var(--husk-n300);
+	border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: var(--husk-n400);
+}
+
+/* Layout shells — straight port of the app's component classes. */
+.main-col {
+	flex: 1 1 0%;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	background: var(--husk-bg);
+	position: relative;
+}
+.stream-scroll {
+	flex: 1 1 0%;
+	min-height: 0;
+	overflow-y: scroll;
+	padding-inline: 16px;
+	padding-block: 16px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.stream-scroll::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+}
+.no-scrollbar {
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+	width: 0;
+	height: 0;
+}
+
+/* Markdown-ish assistant text — trimmed port of the stream's typography. */
+.husk-md {
+	font-size: 14px;
+	line-height: 1.7;
+	color: var(--husk-n900);
+}
+.husk-md p {
+	margin: 0 0 10px;
+}
+.husk-md p:last-child {
+	margin-bottom: 0;
+}
+.husk-md code:not(pre code) {
+	display: inline-block;
+	padding: 1px 5px;
+	margin: 0 2px;
+	font-size: 12px;
+	font-family: var(--husk-code-font);
+	font-weight: 450;
+	line-height: 1.35;
+	background: color-mix(in srgb, var(--husk-black) 5%, transparent);
+	border: 1px solid color-mix(in srgb, var(--husk-black) 7%, transparent);
+	border-radius: 4px;
+}
+.husk-md pre {
+	background: var(--husk-n950);
+	color: var(--husk-n100);
+	border-radius: 10px;
+	padding: 12px 14px;
+	font-family: var(--husk-code-font);
+	font-size: 12px;
+	line-height: 1.6;
+	overflow-x: auto;
+	margin: 8px 0;
+}
+.husk-md ul,
+.husk-md ol {
+	margin: 6px 0 10px;
+	padding-left: 22px;
+}
+.husk-md li {
+	margin: 2px 0;
+}
+.husk-md strong {
+	font-weight: 600;
+}
+
+/* ------------------------------------------------------------------ */
+/* Docs markdown — VitePress-style article typography                  */
+
+.docs-md {
+	color: var(--husk-n900);
+	font-size: 14.5px;
+	line-height: 1.8;
+}
+.docs-md h1 {
+	font-size: 28px;
+	font-weight: 700;
+	letter-spacing: -0.01em;
+	margin: 0 0 20px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid color-mix(in srgb, var(--husk-n200) 60%, transparent);
+}
+.docs-md h2 {
+	font-size: 20px;
+	font-weight: 650;
+	letter-spacing: -0.005em;
+	margin: 34px 0 10px;
+	scroll-margin-top: 5rem;
+}
+.docs-md h3 {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 26px 0 8px;
+	scroll-margin-top: 5rem;
+}
+.docs-md p {
+	margin: 12px 0;
+	color: var(--husk-n800);
+}
+.docs-md strong {
+	font-weight: 600;
+	color: var(--husk-n900);
+}
+.docs-md a {
+	color: var(--husk-n800);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	text-decoration-color: var(--husk-n300);
+}
+.docs-md a:hover {
+	text-decoration-color: var(--husk-n800);
+}
+.docs-md ul,
+.docs-md ol {
+	margin: 12px 0;
+	padding-left: 22px;
+	color: var(--husk-n800);
+}
+.docs-md ul {
+	list-style: disc;
+}
+.docs-md ol {
+	list-style: decimal;
+}
+.docs-md li {
+	margin: 5px 0;
+}
+.docs-md li::marker {
+	color: var(--husk-n400);
+}
+.docs-md code {
+	font-family: 'JetBrainsMono Nerd Font Mono', ui-monospace, monospace;
+	font-size: 0.87em;
+	color: var(--husk-n800);
+	background: color-mix(
+		in srgb,
+		var(--husk-n150, var(--husk-n100)) 90%,
+		transparent
+	);
+	border: 1px solid color-mix(in srgb, var(--husk-n200) 60%, transparent);
+	border-radius: 5px;
+	padding: 0.14em 0.42em;
+}
+.docs-md pre {
+	margin: 14px 0;
+	padding: 14px 16px;
+	border-radius: 10px;
+	border: 1px solid color-mix(in srgb, var(--husk-n200) 65%, transparent);
+	background: color-mix(in srgb, var(--husk-n100) 65%, transparent);
+	overflow-x: auto;
+}
+.dark .docs-md pre {
+	background: rgba(255, 255, 255, 0.04);
+}
+.dark .docs-md code:not(pre code) {
+	background: rgba(255, 255, 255, 0.07);
+}
+.docs-md pre code {
+	display: block;
+	background: transparent;
+	border: none;
+	padding: 0;
+	font-size: 12.5px;
+	line-height: 1.75;
+	tab-size: 4;
+}
+.docs-md blockquote {
+	margin: 14px 0;
+	padding: 2px 0 2px 14px;
+	border-left: 2px solid var(--husk-n300);
+	color: var(--husk-n500);
+}
+.docs-md table {
+	display: block;
+	margin: 16px 0;
+	/* hug the grid — a full-width block box would leave the header bg
+     and borders dangling at intrinsic width */
+	width: fit-content;
+	max-width: 100%;
+	overflow-x: auto;
+	border-collapse: separate;
+	border-spacing: 0;
+	border: 1px solid color-mix(in srgb, var(--husk-n200) 75%, transparent);
+	border-radius: 10px;
+	font-size: 13px;
+}
+.docs-md thead th {
+	padding: 9px 14px;
+	text-align: left;
+	font-weight: 600;
+	color: var(--husk-n800);
+	background: color-mix(in srgb, var(--husk-n100) 70%, transparent);
+	border-bottom: 1px solid color-mix(in srgb, var(--husk-n200) 75%, transparent);
+	white-space: nowrap;
+}
+.dark .docs-md thead th {
+	background: rgba(255, 255, 255, 0.045);
+}
+.docs-md tbody td {
+	padding: 8px 14px;
+	text-align: left;
+	vertical-align: top;
+	border-bottom: 1px solid color-mix(in srgb, var(--husk-n100) 90%, transparent);
+}
+.docs-md tbody tr:last-child td {
+	border-bottom: none;
+}
+.docs-md tbody tr:hover td {
+	background: color-mix(in srgb, var(--husk-n100) 45%, transparent);
+}
+.dark .docs-md tbody tr:hover td {
+	background: rgba(255, 255, 255, 0.03);
+}
+/* first column reads as the "key" — keep it tight */
+.docs-md td:first-child {
+	font-family: 'JetBrainsMono Nerd Font Mono', ui-monospace, monospace;
+	font-size: 12px;
+	white-space: nowrap;
+}
+.docs-md td:first-child code {
+	border: none;
+	background: transparent;
+	padding: 0;
+}
+.docs-md hr {
+	margin: 28px 0;
+	border: none;
+	border-top: 1px solid var(--husk-n200);
+}
+
+/* Dark-mode site chrome */
+.dark {
+	--color-page: #0b0b0d;
+	--color-card: #161619;
+	--color-ink: #e8e8ea;
+	--color-dim: #a0a0a8;
+	--color-faint: #6b6b73;
+	--color-line: #2a2a2f;
+}
+
+/* ---------------- syntax highlight (highlight.js token classes) -------- */
+
+.hljs {
+	color: var(--husk-n800);
+}
+.hljs-comment,
+.hljs-quote {
+	color: var(--hljs-comment);
+	font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-meta,
+.hljs-template-tag {
+	color: var(--hljs-keyword);
+}
+.hljs-string,
+.hljs-regexp,
+.hljs-addition {
+	color: var(--hljs-string);
+}
+.hljs-number,
+.hljs-literal {
+	color: var(--hljs-number);
+}
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-title.function_ {
+	color: var(--hljs-func);
+}
+.hljs-attr,
+.hljs-attribute,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type {
+	color: var(--hljs-attr);
+}
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-selector-class,
+.hljs-selector-id {
+	color: var(--hljs-attr);
+}
+.hljs-built_in,
+.hljs-title.class_,
+.hljs-params {
+	color: var(--hljs-type);
+}
+.hljs-deletion {
+	color: var(--hljs-del);
+}
+.hljs-emphasis {
+	font-style: italic;
+}
+.hljs-strong {
+	font-weight: 600;
+}
+
+:root {
+	--hljs-comment: #7a7a84;
+	--hljs-keyword: #7c3aed;
+	--hljs-string: #1a7f4b;
+	--hljs-number: #0969da;
+	--hljs-func: #b45309;
+	--hljs-attr: #c2410c;
+	--hljs-type: #0f766e;
+	--hljs-del: #b91c1c;
+}
+.dark {
+	--hljs-comment: #7b7b85;
+	--hljs-keyword: #c4b5fd;
+	--hljs-string: #7ee2a8;
+	--hljs-number: #7db8ff;
+	--hljs-func: #f0a35e;
+	--hljs-attr: #ff8f6b;
+	--hljs-type: #5eead4;
+	--hljs-del: #f87171;
 }
