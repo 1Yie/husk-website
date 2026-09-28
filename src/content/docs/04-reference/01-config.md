@@ -7,8 +7,6 @@ Husk 有两个配置文件，都在 `~/.config/husk/` 下：
 | `config.toml`   | 供应商、模型、密钥、降级链、MCP 服务器 |
 | `settings.toml` | 开发者覆写——渲染后端、GPU、调试面板    |
 
-分开的原因：`settings.toml` 里某些值（如错误的渲染后端）能让 GUI 起不来——把这类开关和供应商密钥隔离在两个文件里，改坏了也只有一处要找。
-
 字段一律 snake_case，多数同时接受 camelCase / kebab 别名（`active_provider` ≡ `activeProvider`）。
 
 ## config.toml — 顶层键
