@@ -93,6 +93,143 @@
 	--husk-black: #fafafa;
 }
 
+/* coss color system — the canonical @coss/style preset (registry:
+   @coss/colors-neutral), resolved to Tailwind's default palette values.
+   Written as literals because this file remaps --color-neutral-* and
+   --color-white/black for the ported app markup below — var() refs to
+   them would resolve inverted in .dark. */
+:root {
+	--background: #ffffff;
+	--foreground: #262626;
+	--card: #ffffff;
+	--card-foreground: #262626;
+	--popover: #ffffff;
+	--popover-foreground: #262626;
+	--primary: #262626;
+	--primary-foreground: #fafafa;
+	--secondary: rgb(0 0 0 / 4%);
+	--secondary-foreground: #262626;
+	--muted: rgb(0 0 0 / 4%);
+	--muted-foreground: color-mix(in srgb, #737373 90%, #000);
+	--accent: rgb(0 0 0 / 4%);
+	--accent-foreground: #262626;
+	--destructive: #ef4444;
+	--destructive-foreground: #b91c1c;
+	--border: rgb(0 0 0 / 8%);
+	--input: rgb(0 0 0 / 10%);
+	--ring: #a3a3a3;
+	--info: #3b82f6;
+	--info-foreground: #1d4ed8;
+	--success: #10b981;
+	--success-foreground: #047857;
+	--warning: #f59e0b;
+	--warning-foreground: #b45309;
+	--code: #ffffff;
+	--code-foreground: var(--foreground);
+	--code-highlight: rgb(0 0 0 / 4%);
+	--sidebar: #fafafa;
+	--sidebar-foreground: color-mix(in srgb, #262626 64%, var(--sidebar));
+	--sidebar-primary: #262626;
+	--sidebar-primary-foreground: #fafafa;
+	--sidebar-accent: rgb(0 0 0 / 4%);
+	--sidebar-accent-foreground: #262626;
+	--sidebar-border: rgb(0 0 0 / 6%);
+	--sidebar-ring: #a3a3a3;
+}
+
+.dark {
+	--background: color-mix(in srgb, #0a0a0a 95%, #fff);
+	--foreground: #f5f5f5;
+	--card: color-mix(in srgb, var(--background) 98%, #fff);
+	--card-foreground: #f5f5f5;
+	--popover: color-mix(in srgb, var(--background) 98%, #fff);
+	--popover-foreground: #f5f5f5;
+	--primary: #f5f5f5;
+	--primary-foreground: #262626;
+	--secondary: rgb(255 255 255 / 4%);
+	--secondary-foreground: #f5f5f5;
+	--muted: rgb(255 255 255 / 4%);
+	--muted-foreground: color-mix(in srgb, #737373 90%, #fff);
+	--accent: rgb(255 255 255 / 4%);
+	--accent-foreground: #f5f5f5;
+	--destructive: color-mix(in srgb, #ef4444 90%, #fff);
+	--destructive-foreground: #f87171;
+	--border: rgb(255 255 255 / 6%);
+	--input: rgb(255 255 255 / 8%);
+	--ring: #737373;
+	--info: #3b82f6;
+	--info-foreground: #60a5fa;
+	--success: #10b981;
+	--success-foreground: #34d399;
+	--warning: #f59e0b;
+	--warning-foreground: #fbbf24;
+	--code: color-mix(in srgb, var(--background) 98%, #fff);
+	--code-foreground: var(--foreground);
+	--code-highlight: rgb(255 255 255 / 4%);
+	--sidebar: color-mix(in srgb, #0a0a0a 97%, #fff);
+	--sidebar-foreground: color-mix(in srgb, #f5f5f5 64%, var(--sidebar));
+	--sidebar-primary: #f5f5f5;
+	--sidebar-primary-foreground: #262626;
+	--sidebar-accent: rgb(255 255 255 / 4%);
+	--sidebar-accent-foreground: #f5f5f5;
+	--sidebar-border: rgb(255 255 255 / 5%);
+	--sidebar-ring: #a3a3a3;
+}
+
+/* coss theme mapping — @theme inline so utilities resolve var(--*) at
+   runtime and follow .dark. --color-card intentionally stays mapped to
+   --husk-card below (site surfaces keep their palette). */
+@theme inline {
+	--font-heading: var(--font-sans);
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-info: var(--info);
+	--color-info-foreground: var(--info-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+	--color-warning: var(--warning);
+	--color-warning-foreground: var(--warning-foreground);
+	--color-code: var(--code);
+	--color-code-foreground: var(--code-foreground);
+	--color-code-highlight: var(--code-highlight);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* coss base styles — bare `border` utilities otherwise fall back to
+   currentColor in Tailwind v4; this pins them to --color-border like the
+   preset intends. */
+@layer base {
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground;
+	}
+}
+
 /* Tailwind v4 theme — map utility names onto the husk vars so the ported
    markup (bg-panel, border-hairline, text-neutral-600, rounded-2xl=22px…)
    renders identically to the desktop build. */
@@ -115,7 +252,6 @@
 	--color-text-muted: var(--husk-fg-muted);
 	--color-text-dim: var(--husk-fg-dim);
 	--color-bubble-user: var(--husk-bubble-user);
-	--color-accent: var(--husk-accent);
 	--color-white: var(--husk-white);
 	--color-black: var(--husk-black);
 	--color-neutral-50: var(--husk-n50);
@@ -166,6 +302,17 @@ body {
 	font-size: 14px;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Anchor jumps (hero CTA → #download, nav links) glide instead of snapping;
+   reduced-motion keeps the instant jump. */
+html {
+	scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+	html {
+		scroll-behavior: auto;
+	}
 }
 
 ::-webkit-scrollbar {

@@ -13,7 +13,6 @@ import { modelName } from './mock-data';
 
 const PILL_BASE =
 	'min-w-0 cursor-pointer items-center gap-1.5 rounded-lg border border-[color-mix(in_srgb,var(--husk-n200)_50%,transparent)] bg-[color-mix(in_srgb,var(--husk-n100)_80%,transparent)] px-2.5 py-1 text-[12px] font-medium text-neutral-600 transition-colors select-none hover:bg-[color-mix(in_srgb,var(--husk-n200)_70%,transparent)]';
-const pill = `flex ${PILL_BASE}`;
 /* mode/permission/thinking pills collapse below sm — the right cluster
    (model picker + send) must never get pushed out */
 const pillHidden = `hidden sm:flex ${PILL_BASE}`;
@@ -21,7 +20,15 @@ const pillHidden = `hidden sm:flex ${PILL_BASE}`;
 /** Floating composer card — the streaming state: Steer placeholder, queue +
  *  stop circles on the right (stop shows the B3 orb, morphing to a square on
  *  hover in the real build). */
-export function Composer({ streaming }: { streaming: boolean }) {
+export function Composer({
+	officeMode,
+	streaming,
+}: {
+	/** 工作 mode — coding mention hints are gone and the agent-mode /
+	 *  permission pills hide (thinking pill stays). */
+	officeMode?: boolean;
+	streaming: boolean;
+}) {
 	return (
 		<div className="w-full pt-1 px-4 pb-6 select-none">
 			<div className="mx-auto flex w-full max-w-3xl flex-col gap-2">
@@ -38,7 +45,9 @@ export function Composer({ streaming }: { streaming: boolean }) {
 						placeholder={
 							streaming
 								? '插入指示引导生成 (Steer)…'
-								: '输入消息… @ 引用文件 · / 命令 · $ 技能'
+								: officeMode
+									? '输入消息…'
+									: '输入消息… @ 引用文件 · / 命令 · $ 技能'
 						}
 						readOnly
 						rows={2}
@@ -57,28 +66,34 @@ export function Composer({ streaming }: { streaming: boolean }) {
 								<Plus className="h-4 w-4" />
 							</button>
 
-							<button
-								aria-label="代理模式"
-								className={pillHidden}
-								type="button"
-							>
-								<Bot className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
-								<span className="max-w-[7em] truncate">构建</span>
-								<ChevronsUpDown
-									className="h-3.5 w-3.5 shrink-0 text-neutral-500"
-								/>
-							</button>
-							<button
-								aria-label="权限模式"
-								className={pillHidden}
-								type="button"
-							>
-								<ShieldCheck className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
-								<span className="max-w-[7em] truncate">跳过权限</span>
-								<ChevronsUpDown
-									className="h-3.5 w-3.5 shrink-0 text-neutral-500"
-								/>
-							</button>
+							{!officeMode && (
+								<>
+									<button
+										aria-label="代理模式"
+										className={pillHidden}
+										type="button"
+									>
+										<Bot className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+										<span className="max-w-[7em] truncate">编程</span>
+										<ChevronsUpDown
+											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
+										/>
+									</button>
+									<button
+										aria-label="权限模式"
+										className={pillHidden}
+										type="button"
+									>
+										<ShieldCheck
+											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
+										/>
+										<span className="max-w-[7em] truncate">跳过权限</span>
+										<ChevronsUpDown
+											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
+										/>
+									</button>
+								</>
+							)}
 							<button
 								aria-label="思考推理强度"
 								className={pillHidden}
@@ -93,8 +108,17 @@ export function Composer({ streaming }: { streaming: boolean }) {
 						</div>
 
 						<div className="flex items-center gap-1.5">
-							<button className={pill} type="button">
-								{modelName}
+							{/* Model picker — bare text like the app (no pill chrome);
+							    hover is the only background. */}
+							<button
+								className="flex min-w-0 cursor-pointer select-none items-center
+									gap-1.5 rounded-lg px-2.5 py-1 text-[12px] font-medium
+									text-neutral-600 transition-colors hover:bg-neutral-100"
+								type="button"
+							>
+								<span className="max-w-35 truncate text-[12px]">
+									{modelName}
+								</span>
 								<ChevronsUpDown
 									className="h-3.5 w-3.5 shrink-0 text-neutral-500"
 								/>

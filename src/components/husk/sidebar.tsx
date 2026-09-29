@@ -1,8 +1,16 @@
 import {
+	ArrowUpRight,
 	Bell,
 	Bookmark,
+	Bot,
 	ChevronDown,
 	ChevronRight,
+	Download,
+	File,
+	FileImage,
+	FileSpreadsheet,
+	FileText,
+	FileType,
 	Folder,
 	FolderOpen,
 	FolderPlus,
@@ -16,7 +24,15 @@ import huskIcon from '@/assets/husk-icon.png';
 import { cn } from '@/lib/utils';
 
 import { Orb } from './agent-orb';
-import { projects, recents, type MockSession } from './mock-data';
+import {
+	officeArtifactGroups,
+	officeSessions,
+	projects,
+	recents,
+	type MockArtGroup,
+	type MockArtType,
+	type MockSession,
+} from './mock-data';
 
 /** Session row — same shape as the app's SessionItem: pl-7 h-8, orb when
  *  running, "···" menu on hover, pinned bookmark. */
@@ -151,11 +167,242 @@ function ProjectItem({
 	);
 }
 
+/** Ext → icon+color, mirroring the app's ExtIcon (artifacts panel). */
+function ExtIcon({ ext, className }: { ext: string; className?: string }) {
+	const props = { size: 14 } as const;
+	switch (ext) {
+		case 'pdf':
+			return (
+				<FileText
+					{...props}
+					className={cn('shrink-0 text-red-500', className)}
+				/>
+			);
+		case 'doc':
+		case 'docx':
+			return (
+				<FileText
+					{...props}
+					className={cn('shrink-0 text-sky-500', className)}
+				/>
+			);
+		case 'ppt':
+		case 'pptx':
+			return (
+				<FileType
+					{...props}
+					className={cn('shrink-0 text-amber-500', className)}
+				/>
+			);
+		case 'xls':
+		case 'xlsx':
+		case 'csv':
+			return (
+				<FileSpreadsheet
+					{...props}
+					className={cn('shrink-0 text-emerald-600', className)}
+				/>
+			);
+		case 'png':
+		case 'jpg':
+		case 'jpeg':
+		case 'gif':
+		case 'webp':
+		case 'svg':
+		case 'ttf':
+		case 'woff2':
+			return (
+				<FileImage
+					{...props}
+					className={cn('shrink-0 text-violet-500', className)}
+				/>
+			);
+		default:
+			return (
+				<File
+					{...props}
+					className={cn('shrink-0 text-neutral-500', className)}
+				/>
+			);
+	}
+}
+
+const TYPE_EXT: Record<MockArtType['key'], string> = {
+	pdf: 'pdf',
+	doc: 'docx',
+	ppt: 'pptx',
+	xls: 'xlsx',
+	asset: 'png',
+	other: 'other',
+};
+
+/** 产物 date group — sticky header, type sub-groups collapsed by default,
+ *  files on `pl-9` rows, same as the app's OfficeFileGroup. */
+function OfficeFileGroup({
+	group,
+	defaultOpen,
+}: {
+	group: MockArtGroup;
+	defaultOpen: boolean;
+}) {
+	const [openDay, setOpenDay] = useState(defaultOpen);
+	const [openTypes, setOpenTypes] = useState<Set<string>>(new Set());
+	const count = group.types.reduce((n, t) => n + t.files.length, 0);
+
+	return (
+		<div className="flex flex-col">
+			<div className={cn(openDay && 'bg-panel sticky top-0 z-10 pb-0.5')}>
+				<div
+					className="group flex w-full cursor-pointer items-center gap-1.5
+						rounded-md px-2 py-1.5 text-left text-[13px] text-neutral-800
+						transition-colors
+						hover:bg-[color-mix(in_srgb,var(--husk-black)_4%,transparent)]"
+					onClick={() => setOpenDay(!openDay)}
+					role="button"
+					tabIndex={0}
+				>
+					<span className="shrink-0 text-neutral-500">
+						{openDay ? (
+							<ChevronDown className="h-3.5 w-3.5" />
+						) : (
+							<ChevronRight className="h-3.5 w-3.5" />
+						)}
+					</span>
+					<span className="min-w-0 flex-1 truncate font-medium">
+						{group.label}
+					</span>
+					<span className="shrink-0 text-[11px] text-neutral-500 tabular-nums">
+						{count}
+					</span>
+				</div>
+			</div>
+			{openDay && (
+				<div className="flex flex-col gap-0.5">
+					{group.types.map((type) => (
+						<OfficeTypeGroup
+							key={type.key}
+							open={openTypes.has(type.key)}
+							onToggle={() =>
+								setOpenTypes((prev) => {
+									const next = new Set(prev);
+									if (next.has(type.key)) next.delete(type.key);
+									else next.add(type.key);
+									return next;
+								})
+							}
+							type={type}
+						/>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
+/** Type sub-group — collapsed by default; chevron + type icon + count. */
+function OfficeTypeGroup({
+	type,
+	open,
+	onToggle,
+}: {
+	type: MockArtType;
+	open: boolean;
+	onToggle: () => void;
+}) {
+	return (
+		<div className="flex flex-col">
+			<div
+				className="group flex w-full cursor-pointer items-center gap-1.5
+					rounded-md py-1 pl-4 pr-2 text-left text-[12px] text-neutral-700
+					transition-colors
+					hover:bg-[color-mix(in_srgb,var(--husk-black)_4%,transparent)]"
+				onClick={onToggle}
+				role="button"
+				tabIndex={0}
+			>
+				<span className="shrink-0 text-neutral-400">
+					{open ? (
+						<ChevronDown className="h-3 w-3" />
+					) : (
+						<ChevronRight className="h-3 w-3" />
+					)}
+				</span>
+				<ExtIcon ext={TYPE_EXT[type.key]} />
+				<span className="min-w-0 flex-1 truncate">{type.label}</span>
+				<span className="shrink-0 text-[11px] text-neutral-500 tabular-nums">
+					{type.files.length}
+				</span>
+			</div>
+			{open &&
+				type.files.map((f) => (
+					<div
+						className="group relative flex w-full cursor-pointer items-center
+							gap-1.5 rounded-md py-1 pl-9 pr-2 text-left text-[12px]
+							text-neutral-700 transition-colors
+							hover:bg-[color-mix(in_srgb,var(--husk-black)_4%,transparent)]"
+						key={f.dir + f.name}
+						role="button"
+						tabIndex={0}
+					>
+						<ExtIcon ext={f.ext} />
+						<span className="min-w-0 flex-1 truncate">{f.name}</span>
+						<span
+							className="max-w-[72px] shrink-0 truncate text-[11px]
+								text-neutral-400 group-hover:invisible"
+						>
+							{f.dir}
+						</span>
+						{/* hover action chip — floating overlay like the app's */}
+						<span
+							className="absolute right-2 top-1/2 -translate-y-1/2 invisible
+								flex items-center gap-0.5 rounded-md px-1 py-0.5
+								backdrop-blur-sm
+								bg-[color-mix(in_srgb,var(--color-panel)_85%,transparent)]
+								group-hover:visible"
+						>
+							<button
+								aria-label="打开"
+								className="rounded p-0.5 text-neutral-500
+									hover:bg-[color-mix(in_srgb,var(--husk-n300)_50%,transparent)]
+									hover:text-neutral-700"
+								type="button"
+							>
+								<ArrowUpRight className="h-3 w-3" />
+							</button>
+							<button
+								aria-label="另存为"
+								className="rounded p-0.5 text-neutral-500
+									hover:bg-[color-mix(in_srgb,var(--husk-n300)_50%,transparent)]
+									hover:text-neutral-700"
+								type="button"
+							>
+								<Download className="h-3 w-3" />
+							</button>
+							<button
+								aria-label="打开所在目录"
+								className="rounded p-0.5 text-neutral-500
+									hover:bg-[color-mix(in_srgb,var(--husk-n300)_50%,transparent)]
+									hover:text-neutral-700"
+								type="button"
+							>
+								<FolderOpen className="h-3 w-3" />
+							</button>
+						</span>
+					</div>
+				))}
+		</div>
+	);
+}
+
 export function Sidebar({
 	activeId,
+	office,
+	onMode,
 	onSelect,
 }: {
 	activeId: number;
+	office: boolean;
+	onMode: (office: boolean) => void;
 	onSelect: (id: number) => void;
 }) {
 	return (
@@ -179,66 +426,191 @@ export function Sidebar({
 				>
 					Husk
 				</span>
+
+				{/* 编程 ↔ 工作 switch — lives in the header strip, right-aligned.
+				    Same shape as the app: two fixed-width triggers (w-12, h-[22px])
+				    over a sliding white pill. */}
+				<div
+					aria-label="切换模式"
+					className="relative ml-auto flex gap-0 rounded-md p-0.5
+						bg-[color-mix(in_srgb,var(--husk-black)_5%,transparent)]"
+					role="tablist"
+				>
+					<span
+						aria-hidden
+						className={cn(
+							`absolute inset-y-0.5 left-0.5 w-12 rounded-[8px] bg-white
+							shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-transform
+							duration-200 ease-out will-change-transform transform-gpu`,
+							office && 'translate-x-12'
+						)}
+					/>
+					<button
+						aria-label="切换到编程模式"
+						aria-selected={!office}
+						className={cn(
+							`relative flex h-[22px] w-12 cursor-pointer items-center
+							justify-center gap-1 rounded px-0 py-0 text-[11px] font-normal
+							transition-none`,
+							office
+								? 'text-neutral-500 hover:text-neutral-700'
+								: 'text-neutral-800'
+						)}
+						onClick={() => onMode(false)}
+						role="tab"
+						type="button"
+					>
+						<Bot className="h-3 w-3" />
+						编程
+					</button>
+					<button
+						aria-label="切换到工作模式"
+						aria-selected={office}
+						className={cn(
+							`relative flex h-[22px] w-12 cursor-pointer items-center
+							justify-center gap-1 rounded px-0 py-0 text-[11px] font-normal
+							transition-none`,
+							office
+								? 'text-neutral-800'
+								: 'text-neutral-500 hover:text-neutral-700'
+						)}
+						onClick={() => onMode(true)}
+						role="tab"
+						type="button"
+					>
+						<FileText className="h-3 w-3" />
+						工作
+					</button>
+				</div>
 			</div>
 
 			<div className="flex min-h-0 flex-1 flex-col">
-				<div
-					className="flex flex-none items-center justify-between px-4 pt-3 pb-1"
-				>
-					<span className="text-[13px] font-medium text-neutral-600">会话</span>
-				</div>
-				<div className="flex flex-none flex-col gap-0.5 px-2 pb-1">
-					{recents.map(({ root, project, current, row }) => (
-						<SessionItem
-							active={row.id === activeId}
-							hint={current ? undefined : project}
-							key={`${root}:${row.id}`}
-							onSelect={() => onSelect(row.id)}
-							row={row}
-						/>
-					))}
-				</div>
-
-				<div
-					className="flex flex-none items-center justify-between px-4 pt-2 pb-1"
-				>
-					<span className="text-[13px] font-medium text-neutral-600">项目</span>
-					<div className="flex items-center gap-0.5">
-						<button
-							aria-label="新建会话"
-							className="flex h-5 w-5 items-center justify-center rounded
-								text-neutral-500 transition-colors
-								hover:bg-[color-mix(in_srgb,var(--husk-n200)_60%,transparent)]
-								hover:text-neutral-700"
-							type="button"
+				{!office && (
+					<>
+						<div
+							className="flex flex-none items-center justify-between px-4 pt-3
+								pb-1"
 						>
-							<Plus className="h-3.5 w-3.5" />
-						</button>
-						<button
-							aria-label="打开其他工作区"
-							className="flex h-5 w-5 items-center justify-center rounded
-								text-neutral-500 transition-colors
-								hover:bg-[color-mix(in_srgb,var(--husk-n200)_60%,transparent)]
-								hover:text-neutral-700"
-							type="button"
-						>
-							<FolderPlus className="h-3.5 w-3.5" />
-						</button>
-					</div>
-				</div>
+							<span className="text-[13px] font-medium text-neutral-600">
+								会话
+							</span>
+						</div>
+						<div className="flex flex-none flex-col gap-0.5 px-2 pb-1">
+							{recents.map(({ root, project, current, row }) => (
+								<SessionItem
+									active={row.id === activeId}
+									hint={current ? undefined : project}
+									key={`${root}:${row.id}`}
+									onSelect={() => onSelect(row.id)}
+									row={row}
+								/>
+							))}
+						</div>
 
-				<div className="min-h-0 flex-1 overflow-y-auto">
-					<div className="flex min-h-full flex-col gap-0.5 px-2 pb-2">
-						{projects.map((p) => (
-							<ProjectItem
-								activeId={activeId}
-								key={p.root}
-								onSelect={onSelect}
-								project={p}
-							/>
-						))}
-					</div>
-				</div>
+						<div
+							className="flex flex-none items-center justify-between px-4 pt-2
+								pb-1"
+						>
+							<span className="text-[13px] font-medium text-neutral-600">
+								项目
+							</span>
+							<div className="flex items-center gap-0.5">
+								<button
+									aria-label="新建会话"
+									className="flex h-5 w-5 items-center justify-center rounded
+										text-neutral-500 transition-colors
+										hover:bg-[color-mix(in_srgb,var(--husk-n200)_60%,transparent)]
+										hover:text-neutral-700"
+									type="button"
+								>
+									<Plus className="h-3.5 w-3.5" />
+								</button>
+								<button
+									aria-label="打开其他工作区"
+									className="flex h-5 w-5 items-center justify-center rounded
+										text-neutral-500 transition-colors
+										hover:bg-[color-mix(in_srgb,var(--husk-n200)_60%,transparent)]
+										hover:text-neutral-700"
+									type="button"
+								>
+									<FolderPlus className="h-3.5 w-3.5" />
+								</button>
+							</div>
+						</div>
+
+						<div className="min-h-0 flex-1 overflow-y-auto">
+							<div className="flex min-h-full flex-col gap-0.5 px-2 pb-2">
+								{projects.map((p) => (
+									<ProjectItem
+										activeId={activeId}
+										key={p.root}
+										onSelect={onSelect}
+										project={p}
+									/>
+								))}
+							</div>
+						</div>
+					</>
+				)}
+
+				{office && (
+					<>
+						{/* Section header — 会话 in office mode (the folder button is
+						    build-only); "+" starts a session. */}
+						<div
+							className="flex flex-none items-center justify-between px-4 pt-3
+								pb-1"
+						>
+							<span className="text-[13px] font-medium text-neutral-600">
+								会话
+							</span>
+							<button
+								aria-label="新建会话"
+								className="flex h-5 w-5 items-center justify-center rounded
+									text-neutral-500 transition-colors
+									hover:bg-[color-mix(in_srgb,var(--husk-n200)_60%,transparent)]
+									hover:text-neutral-700"
+								type="button"
+							>
+								<Plus className="h-3.5 w-3.5" />
+							</button>
+						</div>
+
+						{/* office sessions — flat list, shrink-wraps at 45% height */}
+						<div className="max-h-[45%] min-h-0 flex-none overflow-y-auto">
+							<div className="flex flex-col gap-0.5 px-2 pb-1">
+								{officeSessions.map((s) => (
+									<SessionItem
+										active={s.id === activeId}
+										key={s.id}
+										onSelect={() => onSelect(s.id)}
+										row={s}
+									/>
+								))}
+							</div>
+						</div>
+
+						<div
+							className="flex flex-none items-center justify-between px-4 pt-2
+								pb-1"
+						>
+							<span className="text-[13px] font-medium text-neutral-600">
+								产物
+							</span>
+						</div>
+						<div className="min-h-0 flex-1 overflow-y-auto">
+							<div className="flex min-h-full flex-col gap-0.5 px-2 pb-2">
+								{officeArtifactGroups.map((g, i) => (
+									<OfficeFileGroup
+										defaultOpen={i === 0}
+										group={g}
+										key={g.label}
+									/>
+								))}
+							</div>
+						</div>
+					</>
+				)}
 			</div>
 
 			<div

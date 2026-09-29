@@ -1,14 +1,5 @@
 import { useGSAP } from '@gsap/react';
-import {
-	Bot,
-	ChevronDown,
-	Cpu,
-	Download,
-	Lock,
-	Mouse,
-	Plug,
-	ShieldCheck,
-} from '@keyline-icons/react';
+import { ChevronDown, Download } from '@keyline-icons/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useEffect, useRef } from 'react';
@@ -16,88 +7,56 @@ import { siApple, siLinux } from 'simple-icons';
 
 import huskIcon from '@/assets/husk-icon.png';
 import GradientWaves from '@/components/gradient-waves';
+// import { FeatureShowcase } from '@/components/home/feature-showcase';
+// import { PowerShowcase } from '@/components/home/power-showcase';
 import { HuskApp } from '@/components/husk/app-shell';
 import { SiteNav } from '@/components/site-nav';
-import { asset, useLatestRelease } from '@/lib/releases';
+import {
+	asset,
+	PLATFORM_FILES,
+	PLATFORM_NAME,
+	rankPlatformFiles,
+	useLatestRelease,
+	usePlatformTarget,
+	type Platform,
+} from '@/lib/releases';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 const REPO = 'https://github.com/1Yie/husk';
 const RELEASES = `${REPO}/releases`;
 
-const FEATURES = [
-	{
-		icon: Cpu,
-		title: '统一内核架构',
-		desc: '桌面端与命令行端共用同一核心，两端功能与行为保持一致。',
-	},
-	{
-		icon: Lock,
-		title: '沙箱隔离执行',
-		desc: '命令在受限环境中运行，敏感密钥被屏蔽，并设有资源与时间上限，覆盖 Linux、macOS 和 Windows 三大平台。',
-	},
-	{
-		icon: ShieldCheck,
-		title: '五档权限管控',
-		desc: '权限从「逐项确认」到「完全自动」分为五级，并支持设置禁止规则，且禁止规则优先于其他规则。',
-	},
-	{
-		icon: Mouse,
-		title: '桌面操作能力',
-		desc: '可读取屏幕画面，并模拟鼠标与键盘完成点击、拖拽、输入等操作。',
-	},
-	{
-		icon: Bot,
-		title: '多模型接入与自动降级',
-		desc: '兼容 OpenAI、Anthropic、Gemini 等主流模型，支持同时配置多个，主用模型不可用时自动切换至备用模型。',
-	},
-	{
-		icon: Plug,
-		title: '插件扩展机制',
-		desc: '支持通过插件加入自定义检查规则，例如在高风险操作执行前先行拦截，交由用户确认。',
-	},
-] as const;
-
-/* Windows pulled its brand icon from simple-icons — the Win11 mark is just
-   a flat 2×2 grid, trivial to inline. */
 const WINDOWS_LOGO =
 	'M3 3h8.5v8.5H3z M12.5 3H21v8.5h-8.5z M3 12.5h8.5V21H3z M12.5 12.5H21V21h-8.5z';
 
-/* Per-platform asset tails in the release (Husk_<ver>_<tail>). Fetched live
- *  from the latest release — the site never pins a stale version. */
-const PLATFORMS = [
-	{
-		name: 'macOS',
-		note: 'dmg 安装包',
-		logo: siApple.path,
-		files: [
-			{ label: 'Apple Silicon', tail: 'aarch64.dmg' },
-			{ label: 'Intel', tail: 'x64.dmg' },
-		],
-	},
-	{
-		name: 'Linux',
-		note: 'deb · rpm',
-		logo: siLinux.path,
-		files: [
-			{ label: '.deb（Debian / Ubuntu）', tail: 'amd64.deb' },
-			{ label: '.rpm（Fedora / RHEL）', tail: 'x86_64.rpm' },
-		],
-	},
-	{
-		name: 'Windows',
-		note: 'Windows 10+ · x64',
-		logo: WINDOWS_LOGO,
-		files: [
-			{ label: '安装程序 .exe', tail: 'x64-setup.exe' },
-			{ label: 'MSI 包', tail: 'x64_en-US.msi' },
-		],
-	},
-] as const;
+const PLATFORMS: { key: Platform; name: string; note: string; logo: string }[] =
+	[
+		{
+			key: 'macos',
+			name: PLATFORM_NAME.macos,
+			note: 'dmg 安装包',
+			logo: siApple.path,
+		},
+		{
+			key: 'linux',
+			name: PLATFORM_NAME.linux,
+			note: 'deb · rpm',
+			logo: siLinux.path,
+		},
+		{
+			key: 'windows',
+			name: PLATFORM_NAME.windows,
+			note: 'Windows 10+ · x64',
+			logo: WINDOWS_LOGO,
+		},
+	];
 
 export function Home() {
 	const root = useRef<HTMLDivElement>(null);
 	const { tag, assets } = useLatestRelease();
+	/** Resolved on the client: highlights the visitor's own build in the
+	 *  download section, but never auto-picks a download for them. */
+	const { arch, platform } = usePlatformTarget();
 
 	useEffect(() => {
 		document.title = 'Husk — 运行于本地的 AI 编程智能体';
@@ -173,21 +132,33 @@ export function Home() {
 					Husk
 				</h1>
 				<p className="reveal-hero mt-5 text-[19px] text-dim">
-					运行于本地的 AI 编程智能体 — Rust 内核，原生桌面体验。
+					运行于本地的 AI 智能体，由 Rust 内核驱动。
 				</p>
 				<div className="reveal-hero mt-8 flex items-center justify-center gap-3">
+					{/* Scrolls to the download section instead of deciding for the
+					    visitor — the card there marks their own build. */}
 					<a
 						className="flex items-center gap-1.5 rounded-full bg-ink px-6 py-2.5
 							text-[14px] font-medium text-page transition-opacity
 							hover:opacity-85"
 						href="#download"
 					>
-						下载 Linux 版
+						立即尝试 Husk
 						<ChevronDown className="h-4 w-4" />
 					</a>
 				</div>
 				<p className="reveal-hero mt-10 text-[12.5px] text-faint">
-					macOS · Linux · Windows
+					{PLATFORMS.map((p, i) => (
+						<span
+							className={
+								p.key === platform ? 'font-medium text-ink' : undefined
+							}
+							key={p.key}
+						>
+							{i > 0 ? ' · ' : ''}
+							{p.name}
+						</span>
+					))}
 				</p>
 			</section>
 
@@ -209,40 +180,11 @@ export function Home() {
 				</div>
 			</section>
 
-			{/* features */}
-			<section className="mx-auto max-w-6xl px-6 pb-28" id="features">
-				<div className="mb-12 text-center">
-					<h2
-						className="reveal-card text-[32px] font-bold tracking-tight
-							text-ink"
-					>
-						功能
-					</h2>
-					<p className="reveal-card mt-3 text-[15px] text-dim">
-						为高强度人机协作打磨的每个细节。
-					</p>
-				</div>
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{FEATURES.map((f) => (
-						<div
-							className="reveal-card rounded-xl border border-line bg-card p-6
-								transition-colors hover:border-faint/60"
-							key={f.title}
-						>
-							<f.icon className="h-5 w-5 text-dim" />
-							<h3 className="mt-4 text-[15px] font-semibold text-ink">
-								{f.title}
-							</h3>
-							<p className="mt-1.5 text-[13px] leading-relaxed text-dim">
-								{f.desc}
-							</p>
-						</div>
-					))}
-				</div>
-			</section>
+			{/* <FeatureShowcase /> */}
 
-			{/* download — GradientWaves scene behind the platform cards */}
-			<section className="mx-auto max-w-6xl px-6 pb-28" id="download">
+			{/* <PowerShowcase /> */}
+
+			<section className="mx-auto max-w-6xl px-6 pb-28 pt-20" id="download">
 				<div
 					className="reveal-download relative overflow-hidden rounded-2xl px-8
 						py-16 text-center"
@@ -278,10 +220,14 @@ export function Home() {
 						>
 							{PLATFORMS.map((p) => (
 								<div
-									className="flex flex-col items-center rounded-xl border
-										border-white/50 bg-white/55 px-4 py-5 backdrop-blur-md
-										transition-colors hover:bg-white/70"
-									key={p.name}
+									className={`flex flex-col items-center rounded-xl border px-4
+									py-5 backdrop-blur-md transition-colors ${
+										p.key === platform
+											? `border-neutral-900/25 bg-white/80
+												shadow-[0_10px_30px_-16px_rgba(0,0,0,0.35)]`
+											: 'border-white/50 bg-white/55 hover:bg-white/70'
+									}`}
+									key={p.key}
 								>
 									<svg
 										aria-hidden
@@ -291,15 +237,24 @@ export function Home() {
 										<path d={p.logo} />
 									</svg>
 									<span
-										className="mt-1.5 text-[14px] font-medium text-neutral-900"
+										className="mt-1.5 flex items-center gap-1.5 text-[14px]
+											font-medium text-neutral-900"
 									>
 										{p.name}
+										{p.key === platform ? (
+											<span
+												className="rounded-full bg-neutral-900 px-1.5 py-px
+													text-[10px] font-normal text-white"
+											>
+												你的系统
+											</span>
+										) : null}
 									</span>
 									<span className="text-[11.5px] text-neutral-500">
 										{p.note}
 									</span>
 									<div className="mt-2.5 flex flex-col items-center gap-0.5">
-										{p.files.map((f) => {
+										{rankPlatformFiles(PLATFORM_FILES[p.key], arch).map((f) => {
 											const a = asset(assets, f.tail);
 											return a ? (
 												<a
@@ -336,11 +291,11 @@ export function Home() {
 				>
 					<div className="flex items-center gap-2">
 						<img alt="" className="h-4 w-4" src={huskIcon} />
-						<span>Husk — 开源 AI 编程智能体</span>
+						<span>Husk</span>
 					</div>
 					<div className="flex items-center gap-6">
 						<a
-							className="transition-colors hover:text-ink"
+							className="hidden transition-colors hover:text-ink md:inline"
 							href={REPO}
 							rel="noreferrer"
 							target="_blank"
@@ -348,7 +303,7 @@ export function Home() {
 							GitHub
 						</a>
 						<a
-							className="transition-colors hover:text-ink"
+							className="hidden transition-colors hover:text-ink md:inline"
 							href={RELEASES}
 							rel="noreferrer"
 							target="_blank"
@@ -356,7 +311,7 @@ export function Home() {
 							Releases
 						</a>
 						<a
-							className="transition-colors hover:text-ink"
+							className="hidden transition-colors hover:text-ink md:inline"
 							href={`${REPO}/issues`}
 							rel="noreferrer"
 							target="_blank"

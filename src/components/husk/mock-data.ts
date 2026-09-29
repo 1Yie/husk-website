@@ -88,6 +88,99 @@ export type ChatItem =
 
 /** Session → its stream items. Clicking a sidebar row swaps this in. */
 export const conversations: Record<number, ChatItem[]> = {
+	100: [
+		{
+			type: 'user',
+			text: '把 Q3 的数据整理成一份汇报 PPT，封面找一张干净点的配图',
+			ts: '14:02',
+		},
+		{
+			type: 'thinking',
+			label: '思考过程',
+			body: 'office_create 起骨架 → office_add 填页和图表 → image_search 挑封面 → web_download 落到任务目录的 assets/ 下。产物按 <任务>/ 分目录归档，侧栏「产物」里能直接打开。',
+		},
+		{
+			type: 'tools',
+			label: '4 次工具调用',
+			elapsed: '1m48s',
+			rows: [
+				{
+					label: 'office_create',
+					arg: 'q3-review/review.pptx',
+					status: '完成',
+				},
+				{ label: 'office_add', arg: 'slides 12 页 · 图表 6', status: '完成' },
+				{ label: 'image_search', arg: 'minimal hero cover', status: '完成' },
+				{ label: 'web_download', arg: 'cover-hero.png', status: '完成' },
+			],
+		},
+		{
+			type: 'text',
+			md: '搞定了 —— 产物都在 `q3-review/` 目录：`review.pptx`（12 页，6 张图表）和 `assets/cover-hero.png`。\n\n侧栏「产物 · 今天」里可以直接打开，也可以另存到任意位置。',
+		},
+	],
+
+	101: [
+		{
+			type: 'user',
+			text: '帮我写本周周报，重点列这几项：上线灰度到 30%、修了弹窗闪烁、下周发 v0.2',
+			ts: '10:21',
+		},
+		{
+			type: 'thinking',
+			label: '思考过程',
+			body: '周报走 office_create 起 docx 骨架：标题、本周进展、数据、下周计划四节。素材里的指标图用 office_add 插到数据节里。',
+		},
+		{
+			type: 'tools',
+			label: '3 次工具调用',
+			elapsed: '46s',
+			rows: [
+				{
+					label: 'office_create',
+					arg: 'weekly-report/weekly-0928.docx',
+					status: '完成',
+				},
+				{ label: 'office_add', arg: '4 节 · 附图表 1', status: '完成' },
+				{ label: 'office_save', arg: 'weekly-0928.docx', status: '完成' },
+			],
+		},
+		{
+			type: 'text',
+			md: '周报写好了：`weekly-report/weekly-0928.docx`，四节结构 —— 本周进展（灰度 30%）、数据汇总（带使用率折线图）、问题与修复（弹窗闪烁）、下周计划（v0.2 发版）。\n\n措辞我按正式汇报写了，要更口语可以说一声。',
+		},
+	],
+
+	102: [
+		{
+			type: 'user',
+			text: '整理一张竞品对比表，把几个桌面 agent 的功能列出来打分',
+			ts: '昨天 17:44',
+		},
+		{
+			type: 'thinking',
+			label: '思考过程',
+			body: 'xlsx 对比表：一家一行，列放工具调用、权限控制、产物管理、开源模型接入。先 office_create 建簿，再 office_add 填评分和备注。',
+		},
+		{
+			type: 'tools',
+			label: '2 次工具调用',
+			elapsed: '38s',
+			rows: [
+				{
+					label: 'office_create',
+					arg: 'benchmark/benchmark-q3.xlsx',
+					status: '完成',
+				},
+				{ label: 'office_add', arg: '5 产品 × 6 维度', status: '完成' },
+			],
+		},
+		{
+			type: 'text',
+			md: '对比表在 `benchmark/benchmark-q3.xlsx`：5 家产品、6 个维度，每格是 1–5 分加一句备注。\n\n主观评分我标了黄色底，要改口径直接改那几列。',
+		},
+	],
+
 	9: [
 		{
 			type: 'user',
@@ -286,3 +379,100 @@ export const stats = {
 };
 
 export const modelName = 'SWE-2';
+
+/* ----------------------- 工作 mode (office) ----------------------- */
+
+/** The office pseudo-workspace — a flat session list (no projects/recents),
+ *  mirroring `ProjectOverview.sessions` for the「工作」sidebar section. */
+export const officeSessions: MockSession[] = [
+	{ id: 100, title: 'Q3 复盘汇报 PPT' },
+	{ id: 101, title: '本周周报' },
+	{ id: 102, title: '竞品调研对比表' },
+];
+
+export interface MockOfficeFile {
+	/** File name only — `dir` carries the `<task>/assets` folder hint. */
+	name: string;
+	/** Relative dir under the office root, e.g. `q3-review/`. */
+	dir: string;
+	ext: string;
+}
+
+export interface MockArtType {
+	key: 'pdf' | 'doc' | 'ppt' | 'xls' | 'asset' | 'other';
+	label: string;
+	files: MockOfficeFile[];
+}
+
+export interface MockArtGroup {
+	label: string;
+	types: MockArtType[];
+}
+
+/** 产物 section — date → type → files, same shape as the sidebar's
+ *  two-level grouping (newest day open, type rows collapsed). */
+export const officeArtifactGroups: MockArtGroup[] = [
+	{
+		label: '今天',
+		types: [
+			{
+				key: 'ppt',
+				label: 'PPT',
+				files: [{ name: 'review.pptx', dir: 'q3-review/', ext: 'pptx' }],
+			},
+			{
+				key: 'asset',
+				label: '素材',
+				files: [
+					{
+						name: 'cover-hero.png',
+						dir: 'q3-review/assets/',
+						ext: 'png',
+					},
+					{
+						name: 'usage-chart.png',
+						dir: 'q3-review/assets/',
+						ext: 'png',
+					},
+				],
+			},
+		],
+	},
+	{
+		label: '昨天',
+		types: [
+			{
+				key: 'doc',
+				label: 'DOC',
+				files: [
+					{
+						name: 'weekly-0928.docx',
+						dir: 'weekly-report/',
+						ext: 'docx',
+					},
+				],
+			},
+			{
+				key: 'xls',
+				label: 'XLS',
+				files: [
+					{
+						name: 'benchmark-q3.xlsx',
+						dir: 'benchmark/',
+						ext: 'xlsx',
+					},
+				],
+			},
+		],
+	},
+	{
+		label: '9月15日',
+		types: [
+			{
+				key: 'pdf',
+				label: 'PDF',
+				files: [{ name: '调研结论.pdf', dir: 'research/', ext: 'pdf' }],
+			},
+		],
+	},
+];

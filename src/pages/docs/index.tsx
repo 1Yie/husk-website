@@ -1,8 +1,16 @@
-import { ChevronDown } from '@keyline-icons/react';
-import { useEffect, useMemo } from 'react';
+import { ChevronDown, List } from '@keyline-icons/react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 
 import { SiteNav } from '@/components/site-nav';
+import {
+	Sheet,
+	SheetHeader,
+	SheetPanel,
+	SheetPopup,
+	SheetTitle,
+	SheetTrigger,
+} from '@/components/ui/sheet';
 import {
 	firstPage,
 	getPage,
@@ -23,6 +31,7 @@ export function Docs() {
 	const { '*': splat } = useParams();
 	const [section, slug] = (splat ?? '').split('/');
 	const page = getPage(section, slug);
+	const [navOpen, setNavOpen] = useState(false);
 
 	// New page → reset scroll to top, like a real docs site.
 	useEffect(() => {
@@ -51,38 +60,31 @@ export function Docs() {
 					className="sticky top-6 hidden h-[calc(100dvh-5rem)] w-56 flex-none
 						self-start overflow-y-auto pt-8 pb-10 lg:block"
 				>
-					{sections.map((sec) => (
-						<div className="mb-5" key={sec.key}>
-							<p className="px-3 pb-1.5 text-[12px] font-semibold text-faint">
-								{sec.title}
-							</p>
-							<ul className="flex flex-col gap-px">
-								{sec.pages.map((p) => {
-									const active = p === page;
-									return (
-										<li key={p.slug}>
-											<Link
-												className={cn(
-													`block rounded-md px-3 py-1.5 text-[13.5px]
-													transition-colors`,
-													active
-														? 'bg-ink/7 font-medium text-ink'
-														: 'text-dim hover:bg-ink/5 hover:text-ink'
-												)}
-												to={`/docs/${sec.key}/${p.slug}`}
-											>
-												{p.title}
-											</Link>
-										</li>
-									);
-								})}
-							</ul>
-						</div>
-					))}
+					<DocTree page={page} />
 				</aside>
 
 				{/* content */}
 				<main className="min-w-0 max-w-3xl flex-1 pt-10 pb-20">
+					{/* mobile nav — the file tree lives in a left Sheet below lg.
+					    Popup is portaled, so it can sit inside <main>. */}
+					<Sheet onOpenChange={setNavOpen} open={navOpen}>
+						<SheetTrigger
+							className="mb-6 flex items-center gap-1.5 rounded-md border
+								border-line bg-card px-3 py-1.5 text-[13px] text-dim
+								transition-colors hover:text-ink lg:hidden"
+						>
+							<List className="h-3.5 w-3.5" />
+							文档目录
+						</SheetTrigger>
+						<SheetPopup className="max-w-80" side="left">
+							<SheetHeader>
+								<SheetTitle className="text-base">文档目录</SheetTitle>
+							</SheetHeader>
+							<SheetPanel>
+								<DocTree onNavigate={() => setNavOpen(false)} page={page} />
+							</SheetPanel>
+						</SheetPopup>
+					</Sheet>
 					<article
 						className="docs-md"
 						dangerouslySetInnerHTML={{ __html: rendered.html }}
@@ -114,6 +116,49 @@ export function Docs() {
 				</aside>
 			</div>
 		</div>
+	);
+}
+
+/** Section → page tree, shared by the desktop sidebar and the mobile drawer. */
+function DocTree({
+	page,
+	onNavigate,
+}: {
+	page: DocPage;
+	onNavigate?: () => void;
+}) {
+	return (
+		<>
+			{sections.map((sec) => (
+				<div className="mb-5" key={sec.key}>
+					<p className="px-3 pb-1.5 text-[12px] font-semibold text-faint">
+						{sec.title}
+					</p>
+					<ul className="flex flex-col gap-px">
+						{sec.pages.map((p) => {
+							const active = p === page;
+							return (
+								<li key={p.slug}>
+									<Link
+										className={cn(
+											`block rounded-md px-3 py-1.5 text-[13.5px]
+											transition-colors`,
+											active
+												? 'bg-ink/7 font-medium text-ink'
+												: 'text-dim hover:bg-ink/5 hover:text-ink'
+										)}
+										onClick={onNavigate}
+										to={`/docs/${sec.key}/${p.slug}`}
+									>
+										{p.title}
+									</Link>
+								</li>
+							);
+						})}
+					</ul>
+				</div>
+			))}
+		</>
 	);
 }
 
