@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react';
 import { siApple, siLinux } from 'simple-icons';
 
 import huskIcon from '@/assets/husk-icon.png';
+import ingstarIcon from '@/assets/ingstar-icon.png';
 import GradientWaves from '@/components/gradient-waves';
 // import { FeatureShowcase } from '@/components/home/feature-showcase';
 // import { PowerShowcase } from '@/components/home/power-showcase';
@@ -289,9 +290,22 @@ export function Home() {
 					className="mx-auto flex h-16 max-w-7xl items-center justify-between
 						px-6 text-[12.5px] text-faint"
 				>
-					<div className="flex items-center gap-2">
-						<img alt="" className="h-4 w-4" src={huskIcon} />
-						<span>Husk</span>
+					<div className="flex items-center gap-4">
+						<div className="flex items-center gap-2">
+							<img alt="" className="h-4 w-4" src={huskIcon} />
+							<span>Husk</span>
+						</div>
+						<span className="h-3 w-px bg-line" />
+						<a
+							className="flex items-center gap-1.5 transition-colors
+								hover:text-ink"
+							href="https://ingstar.im/"
+							rel="noreferrer"
+							target="_blank"
+						>
+							<span>Powered by ingStar</span>
+							<img alt="" className="h-4 w-4" src={ingstarIcon} />
+						</a>
 					</div>
 					<div className="flex items-center gap-6">
 						<a
