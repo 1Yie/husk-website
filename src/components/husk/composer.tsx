@@ -1,11 +1,11 @@
 import {
 	ArrowUp,
-	Bot,
 	Brain,
 	ChevronsUpDown,
+	Hammer,
 	Plus,
-	ShieldCheck,
 	Square,
+	Zap,
 } from '@keyline-icons/react';
 
 import { Orb } from './agent-orb';
@@ -59,8 +59,10 @@ export function Composer({
 							<button
 								aria-label="添加附件"
 								className="flex h-7 w-7 shrink-0 cursor-pointer items-center
-									justify-center rounded-full text-neutral-500 transition-colors
-									hover:bg-neutral-100 hover:text-neutral-700"
+									justify-center rounded-full border
+									border-[color-mix(in_srgb,var(--husk-n200)_80%,transparent)]
+									bg-neutral-100 text-neutral-500 transition-colors
+									hover:bg-neutral-200 hover:text-neutral-700"
 								type="button"
 							>
 								<Plus className="h-4 w-4" />
@@ -73,8 +75,8 @@ export function Composer({
 										className={pillHidden}
 										type="button"
 									>
-										<Bot className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
-										<span className="max-w-[7em] truncate">编程</span>
+										<Hammer className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+										<span className="max-w-[7em] truncate">构建</span>
 										<ChevronsUpDown
 											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
 										/>
@@ -84,27 +86,14 @@ export function Composer({
 										className={pillHidden}
 										type="button"
 									>
-										<ShieldCheck
-											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
-										/>
-										<span className="max-w-[7em] truncate">跳过权限</span>
+										<Zap className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+										<span className="max-w-[7em] truncate">自动</span>
 										<ChevronsUpDown
 											className="h-3.5 w-3.5 shrink-0 text-neutral-500"
 										/>
 									</button>
 								</>
 							)}
-							<button
-								aria-label="思考推理强度"
-								className={pillHidden}
-								type="button"
-							>
-								<Brain className="h-3.5 w-3.5 shrink-0 text-purple-600" />
-								<span className="max-w-[140px] truncate">最大推理（max）</span>
-								<ChevronsUpDown
-									className="h-3.5 w-3.5 shrink-0 text-neutral-500"
-								/>
-							</button>
 						</div>
 
 						<div className="flex items-center gap-1.5">
@@ -116,12 +105,25 @@ export function Composer({
 									text-neutral-600 transition-colors hover:bg-neutral-100"
 								type="button"
 							>
-								<span className="max-w-35 truncate text-[12px]">
+								<span className="max-w-[140px] truncate text-[12px]">
 									{modelName}
 								</span>
-								<ChevronsUpDown
-									className="h-3.5 w-3.5 shrink-0 text-neutral-500"
-								/>
+								{/* The thinking level rides with the model — one control
+								    picks both what answers and how hard it thinks. */}
+								<span
+									className="flex shrink-0 items-center gap-1 border-l
+										border-[color-mix(in_srgb,var(--husk-n200)_70%,transparent)]
+										pl-1.5"
+								>
+									<Brain className="h-3 w-3 shrink-0 text-purple-600" />
+									<span
+										className="max-w-[5em] truncate text-[11px]
+											text-neutral-500"
+									>
+										Max
+									</span>
+								</span>
+								<ChevronsUpDown className="h-3 w-3.5 shrink-0 text-neutral-500" />
 							</button>
 							{streaming ? (
 								<button

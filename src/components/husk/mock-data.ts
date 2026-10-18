@@ -378,7 +378,7 @@ export const stats = {
 	changes: 1,
 };
 
-export const modelName = 'SWE-2';
+export const modelName = 'GPT 6.1 Sol';
 
 /* ----------------------- 工作 mode (office) ----------------------- */
 
